@@ -1,30 +1,21 @@
 package com.tans.androidhandlerdemo
 
-import java.util.concurrent.atomic.AtomicReference
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.runBlocking
 
 class MessageQueue {
     private var isQuite: Boolean = false
-    val messages: AtomicReference<List<Message>?> = AtomicReference()
-    fun next(): Message? {
-        while (true) {
-            if (isQuite)
-                return null
-            // println("Result: ${messages.get()}")
-            val messages = this.messages.get() ?: continue
-            val message = messages.getOrNull(0) ?: continue
-            val newMessages = messages - message
-            this.messages.set(newMessages)
-            return message
+    val messages: Channel<Message> = Channel(Channel.UNLIMITED)
+    fun next(): Message? = runBlocking {
+        if (isQuite) {
+            null
+        } else {
+            messages.receive()
         }
     }
 
-    fun enqueue(newMessage: Message) {
-        val messages = this.messages.get()
-        if (messages == null) {
-            this.messages.set(listOf(newMessage))
-        } else {
-            this.messages.set(messages + newMessage)
-        }
+    fun enqueue(newMessage: Message) = runBlocking {
+        messages.send(newMessage)
     }
 
     fun quite() {

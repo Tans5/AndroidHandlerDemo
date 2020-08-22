@@ -65,7 +65,7 @@ fun main() {
         Looper.mainLooper().loop()
     }
     workExecutors.execute {
-        Thread.sleep(100)
+        Thread.sleep(200)
         val mainActivityHandler = ActivityLifeHandler(activity = mainActivity)
         mainActivityHandler.sendStartActivityEvent()
     }
