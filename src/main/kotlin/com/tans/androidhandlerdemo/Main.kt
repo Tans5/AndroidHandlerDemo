@@ -1,9 +1,9 @@
 package com.tans.androidhandlerdemo
 
-import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.Executors
+import java.util.concurrent.SynchronousQueue
 
 val workExecutors = Executors.newFixedThreadPool(5)
 val mainExecutors = Executors.newSingleThreadExecutor { runnable ->
@@ -92,13 +92,16 @@ val mainActivity: Activity = object : Activity {
 }
 
 fun main() {
+    val mainOkSync = SynchronousQueue<Unit>()
     mainExecutors.execute {
         Looper.prepareMain()
+        mainOkSync.put(Unit)
         Looper.mainLooper().loop()
     }
     workExecutors.execute {
-        Thread.sleep(200)
+        mainOkSync.take()
         val mainActivityHandler = MainThreadHandler(activity = mainActivity)
         mainActivityHandler.sendStartActivityEvent()
     }
+    println("Main Method Finished...")
 }

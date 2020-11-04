@@ -1,22 +1,25 @@
 package com.tans.androidhandlerdemo
 
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.runBlocking
+import java.util.concurrent.LinkedBlockingQueue
 
 class MessageQueue {
     private var isQuite: Boolean = false
-    val messages: Channel<Message> = Channel(Channel.UNLIMITED)
-    fun next(): Message? = runBlocking {
-        if (isQuite) {
+    val messages: LinkedBlockingQueue<Message> = LinkedBlockingQueue()
+
+    fun next(): Message? {
+        return if (isQuite) {
             null
         } else {
-            messages.receive()
+            try {
+                messages.take()
+            } catch (e: InterruptedException) {
+                isQuite = true
+                null
+            }
         }
     }
 
-    fun enqueue(newMessage: Message) = runBlocking {
-        messages.send(newMessage)
-    }
+    fun enqueue(newMessage: Message) = messages.offer(newMessage)
 
     fun quite() {
         synchronized(this) {

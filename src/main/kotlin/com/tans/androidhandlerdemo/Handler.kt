@@ -11,9 +11,7 @@ abstract class Handler {
         messageQueue = looper.messageQueue
     }
 
-    fun sendMessage(msg: Message) {
-        messageQueue.enqueue(msg)
-    }
+    fun sendMessage(msg: Message) = messageQueue.enqueue(msg)
 
     fun obtainMessage(msg: Any): Message = Message(this, msg)
 
